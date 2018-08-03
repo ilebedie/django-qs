@@ -1,0 +1,40 @@
+version: '3'
+services:
+  db:
+    build:
+      context: .
+      dockerfile: db.dockerfile
+  start_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - db
+    command: db:5432
+
+#  test:
+#    build:
+#      context: . 
+#      dockerfile: webserver.dockerfile
+#    environment:
+#      DJANGO_SETTINGS_MODULE: djangotemp.settings
+#      TEST_OUTPUT_DIR: /reports
+#    command: ./manage.py test --keepdb --noinput
+#    volumes:
+#      - .:/src
+#    depends_on:
+#      - db
+
+  web:
+    build:
+      context: . 
+      dockerfile: webserver.dockerfile
+    environment:
+      DJANGO_SETTINGS_MODULE: django_qs.settings
+      TEST_OUTPUT_DIR: /reports
+      AWS_DEFAULT_REGION: eu-west-1
+    command: ./manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/src
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
